@@ -1,0 +1,85 @@
+<!--
+  ============================================================
+  BURBUJA DE CHAT ACTIOM PARA WORDPRESS
+  ============================================================
+  Pega TODO este bloque en el PIE (footer) de tu web de WordPress
+  (lo más fácil: plugin gratuito "WPCode" o "Insert Headers and
+  Footers" -> sección Footer/Pie). Aparecerá en todas las páginas.
+
+  No necesitas tocar nada más: el cerebro del asistente (y la API key)
+  vive en widget.html, alojado en GitHub Pages. Si algún día cambias
+  el asistente, editas widget.html y aquí no hay que tocar nada.
+
+  Si cambias la URL de tu sitio, actualiza ACTIOM_WIDGET_URL abajo.
+  ============================================================
+-->
+<div id="actiom-chat-root">
+  <!-- Botón flotante -->
+  <button id="actiom-chat-toggle" aria-label="Abrir chat de ACTIOM">
+    <svg id="actiom-icon-chat" width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3C6.9 3 3 6.6 3 11c0 2.2 1 4.2 2.7 5.6L5 21l4.7-1.7c.7.2 1.5.3 2.3.3 5.1 0 9-3.6 9-8s-3.9-8.6-9-8.6Z" fill="#fff"/>
+    </svg>
+    <svg id="actiom-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display:none">
+      <path d="M6 6l12 12M18 6 6 18" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Panel del chat -->
+  <div id="actiom-chat-panel" role="dialog" aria-label="Asistente ACTIOM">
+    <iframe id="actiom-chat-iframe" title="Asistente ACTIOM" loading="lazy"></iframe>
+  </div>
+</div>
+
+<style>
+  #actiom-chat-toggle {
+    position: fixed; right: 22px; bottom: 22px; z-index: 2147483000;
+    width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
+    background: #12a594; box-shadow: 0 8px 24px rgba(18,165,148,.45);
+    display: grid; place-items: center; transition: transform .15s ease, background .15s ease;
+  }
+  #actiom-chat-toggle:hover { background: #0e8579; transform: translateY(-2px); }
+  #actiom-chat-panel {
+    position: fixed; right: 22px; bottom: 94px; z-index: 2147483000;
+    width: 384px; height: 600px; max-height: calc(100vh - 120px);
+    background: #fff; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 18px 60px rgba(26,36,51,.28); border: 1px solid #e3e9ec;
+    opacity: 0; transform: translateY(12px) scale(.98); pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  #actiom-chat-panel.actiom-open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+  #actiom-chat-iframe { width: 100%; height: 100%; border: 0; display: block; }
+  @media (max-width: 480px) {
+    #actiom-chat-panel {
+      right: 12px; left: 12px; bottom: 88px; width: auto;
+      height: calc(100vh - 110px); max-height: none;
+    }
+    #actiom-chat-toggle { right: 16px; bottom: 16px; }
+  }
+</style>
+
+<script>
+(function () {
+  // URL de la versión compacta del chat (cámbiala si mueves el sitio):
+  var ACTIOM_WIDGET_URL = "https://DGF80.github.io/mediakit-website/widget.html";
+
+  var root   = document.getElementById("actiom-chat-root");
+  var toggle = document.getElementById("actiom-chat-toggle");
+  var panel  = document.getElementById("actiom-chat-panel");
+  var iframe = document.getElementById("actiom-chat-iframe");
+  var iconChat  = document.getElementById("actiom-icon-chat");
+  var iconClose = document.getElementById("actiom-icon-close");
+  var loaded = false, open = false;
+
+  function setOpen(v) {
+    open = v;
+    if (open && !loaded) { iframe.src = ACTIOM_WIDGET_URL; loaded = true; } // carga perezosa: solo al abrir
+    panel.classList.toggle("actiom-open", open);
+    iconChat.style.display  = open ? "none" : "block";
+    iconClose.style.display = open ? "block" : "none";
+    toggle.setAttribute("aria-label", open ? "Cerrar chat de ACTIOM" : "Abrir chat de ACTIOM");
+  }
+  toggle.addEventListener("click", function () { setOpen(!open); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && open) setOpen(false); });
+})();
+</script>
+<!-- ===== Fin burbuja de chat ACTIOM ===== -->

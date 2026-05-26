@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Asistente ACTIOM</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #1a2433;
+    --ink-soft: #5a6b7b;
+    --accent: #12a594;
+    --accent-dark: #0e8579;
+    --accent-soft: #e6f6f3;
+    --border: #e3e9ec;
+    --bot-bubble: #f1f4f6;
+    --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex: 0 0 auto;
+  }
+  .head .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); display: grid; place-items: center; }
+  .head .who .name { font-weight: 650; font-size: 14.5px; line-height: 1.2; }
+  .head .who .status { font-size: 12px; color: var(--accent-dark); display: flex; align-items: center; gap: 6px; }
+  .head .who .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  /* Messages */
+  .messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 14px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .row { display: flex; gap: 8px; align-items: flex-end; }
+  .row.user { flex-direction: row-reverse; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; background: var(--accent-soft); }
+  .row.user .avatar { background: #eef1f3; }
+  .bubble {
+    padding: 10px 13px; border-radius: 15px; font-size: 14.5px; line-height: 1.5;
+    max-width: 82%; word-wrap: break-word; white-space: pre-wrap;
+  }
+  .row.bot .bubble { background: var(--bot-bubble); color: var(--ink); border-bottom-left-radius: 4px; }
+  .row.user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 11px;
+    background: var(--accent); color: #fff; text-decoration: none; font-weight: 650;
+    font-size: 14px; padding: 10px 16px; border-radius: 11px;
+    box-shadow: 0 6px 16px rgba(18,165,148,.28); transition: background .15s ease, transform .15s ease;
+  }
+  .cta:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+  .typing { display: flex; gap: 4px; padding: 3px 2px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-soft); opacity: .5; animation: blink 1.3s infinite both; }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100% { opacity:.25; transform: translateY(0);} 40% { opacity:.9; transform: translateY(-3px);} }
+
+  /* Composer */
+  .composer { border-top: 1px solid var(--border); padding: 10px 12px; display: flex; gap: 8px; align-items: flex-end; background: var(--bg); flex: 0 0 auto; }
+  .composer textarea {
+    flex: 1; resize: none; border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 12px; font-family: inherit; font-size: 14.5px; color: var(--ink);
+    line-height: 1.4; max-height: 110px; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .composer textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .send { border: none; background: var(--accent); color: #fff; width: 42px; height: 42px; border-radius: 11px; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; transition: background .15s, transform .1s; }
+  .send:hover:not(:disabled) { background: var(--accent-dark); }
+  .send:active:not(:disabled) { transform: scale(.94); }
+  .send:disabled { background: #c2cdd4; cursor: not-allowed; }
+
+  .notice { text-align: center; font-size: 12px; color: #b4540a; background: #fff6ed; border: 1px solid #ffe0c2; border-radius: 9px; padding: 9px 11px; margin: 0 12px 10px; }
+  .foot { text-align: center; font-size: 11px; color: var(--ink-soft); padding: 6px 0 9px; flex: 0 0 auto; }
+  .foot a { color: var(--accent-dark); text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="avatar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#12a594"/></svg></div>
+    <div class="who">
+      <div class="name">Asistente ACTIOM</div>
+      <div class="status">En línea · responde al instante</div>
+    </div>
+  </div>
+
+  <div id="messages" class="messages" aria-live="polite"></div>
+
+  <div id="apiNotice" class="notice" hidden>Configura tu clave de API de Anthropic en widget.html para activar el asistente.</div>
+
+  <form id="composer" class="composer" autocomplete="off">
+    <textarea id="input" rows="1" placeholder="Escribe tu mensaje…" aria-label="Escribe tu mensaje"></textarea>
+    <button id="send" class="send" type="submit" aria-label="Enviar">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3.4 20.4 21 12 3.4 3.6 3 10l12 2-12 2 .4 6.4Z" fill="currentColor"/></svg>
+    </button>
+  </form>
+
+  <div class="foot">Powered by ACTIOM · <a href="https://actiom.eco" target="_blank" rel="noopener">actiom.eco</a></div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================ */
+
+// REPLACE WITH YOUR ANTHROPIC API KEY
+const ANTHROPIC_API_KEY = "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";
+
+const MODEL = "claude-sonnet-4-20250514";
+const API_URL = "https://api.anthropic.com/v1/messages";
+const ACTIOM_URL = "https://actiom.eco";
+
+/* ============================================================
+   SYSTEM PROMPT — comportamiento, contexto CAE y tono del agente
+   ============================================================ */
+const SYSTEM_PROMPT = `Eres el asistente conversacional de ACTIOM (actiom.eco), una plataforma SaaS española que gestiona todo el ciclo de vida de los Certificados de Ahorro Energético (CAE). Atiendes a visitantes de la web como lo haría una persona cálida y cercana de un centro de atención: tu objetivo es ayudarles a descubrir si su proyecto de eficiencia energética puede generar CAE y, si hay encaje, invitarles a solicitar una consulta gratuita en actiom.eco.
+
+# QUÉ SON LOS CAE (contexto que debes manejar, sin soltarlo de golpe)
+Los Certificados de Ahorro Energético (CAE) son certificados electrónicos regulados por el Real Decreto 36/2023 y gestionados por el MITERD (Ministerio para la Transición Ecológica y el Reto Demográfico). Cada CAE certifica 1 kWh/año de ahorro de energía final.
+Las empresas que ejecutan actuaciones de eficiencia energética pueden obtener CAE por el ahorro conseguido y venderlos a los "sujetos obligados" (las comercializadoras y distribuidoras de energía que tienen la obligación legal de promover el ahorro energético). Así, una parte de la inversión del proyecto se recupera monetizando el ahorro.
+Actores del sistema: sujetos obligados, sujetos delegados, verificadores. ACTIOM coordina a todos: análisis de elegibilidad, documentación, flujo de trabajo y liquidación económica.
+
+# ACTUACIONES TÍPICAS ELEGIBLES (orientativo)
+- Sustitución de iluminación por LED.
+- Renovación o mejora de sistemas de climatización (HVAC).
+- Sustitución de motores industriales por otros de mayor eficiencia.
+- Aislamiento térmico de la envolvente de edificios.
+- Integración de energías renovables.
+- Mejora de sistemas de refrigeración.
+- Sustitución de equipos industriales por modelos más eficientes.
+
+# QUÉ NO SUELE SER ELEGIBLE
+- Trabajos de mantenimiento (no generan ahorro nuevo y verificable).
+- Proyectos YA INICIADOS antes de tramitar la solicitud de CAE (la solicitud debe ser previa al inicio de la actuación; este es un requisito clave).
+- Reformas no relacionadas con la energía.
+
+# CÓMO CONVERSAR
+1. En tu PRIMER mensaje: saluda con calidez, preséntate como el asistente de ACTIOM en una frase, y abre preguntando qué tipo de mejora de eficiencia energética tiene en mente o ha hecho hace poco. No expliques aún qué son los CAE salvo que lo pregunten.
+2. Haz preguntas cortas y conversacionales, UNA SOLA cada vez (nunca un formulario ni varias preguntas juntas), para ir averiguando:
+   - tipo de actuación,
+   - tamaño aproximado de la inversión,
+   - si el proyecto ya ha empezado o está planificado,
+   - sector (industria, comercio/retail, edificios, logística, etc.),
+   - consumo energético anual aproximado, si lo conoce.
+   Reacciona a lo que te diga antes de pasar a la siguiente pregunta.
+3. Cuando tengas información suficiente, explica en lenguaje sencillo y no técnico si su actuación parece elegible o no para CAE, y por qué, con honestidad:
+   - Si encaja, da una estimación cualitativa y prudente de la oportunidad económica. Por ejemplo: "proyectos como el tuyo suelen recuperar entre un 10% y un 30% de la inversión a través de los CAE". Deja claro que es orientativo.
+   - Si ya empezó la obra o es mantenimiento/reforma no energética, explícalo con tacto: probablemente no sea elegible y por qué, pero invítale igualmente a confirmarlo con un especialista.
+4. Termina SIEMPRE tu valoración con esta invitación, palabra por palabra:
+"¿Quieres que un especialista de ACTIOM analice tu caso en detalle? Puedes solicitar una consulta gratuita en actiom.eco"
+   Y añade al final de ese mensaje, en una línea aparte, exactamente el marcador: [CTA] para que la interfaz muestre el botón.
+
+# REGLAS IMPORTANTES
+- Idioma: SOLO español. Trata al usuario de "tú".
+- Tono: cálido, claro, humano y cercano. Nunca robótico ni con guion evidente. Sin jerga legal ni tecnicismos innecesarios.
+- Párrafos cortos. Mensajes breves y fáciles de leer.
+- No inventes cifras exactas de CAE, precios, ni reglas de elegibilidad que no estén aquí. Si no estás seguro de la elegibilidad, dilo con honestidad e invita a que un especialista lo confirme.
+- No prometas resultados garantizados. Habla siempre de estimaciones orientativas.
+- Mantente en tema: eficiencia energética y CAE. Si el usuario se desvía, reconduce con amabilidad hacia su proyecto.
+- No pidas datos personales sensibles. La captación del lead se hace en actiom.eco.
+- Usa el marcador [CTA] únicamente cuando incluyas la invitación final; no lo uses en cada mensaje.`;
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const messages = [];
+const $messages = document.getElementById("messages");
+const $form = document.getElementById("composer");
+const $input = document.getElementById("input");
+const $send = document.getElementById("send");
+const $notice = document.getElementById("apiNotice");
+
+const keyConfigured =
+  ANTHROPIC_API_KEY &&
+  ANTHROPIC_API_KEY !== "REPLACE_WITH_YOUR_ANTHROPIC_API_KEY" &&
+  ANTHROPIC_API_KEY.startsWith("sk-");
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function avatarBot() {
+  return `<div class="avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#12a594"/></svg></div>`;
+}
+function avatarUser() {
+  return `<div class="avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#8a99a6"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" fill="#8a99a6"/></svg></div>`;
+}
+function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function renderBotContent(text) {
+  const hasCta = /\[CTA\]/.test(text);
+  let clean = text.replace(/\[CTA\]/g, "").trim();
+  let html = escapeHtml(clean);
+  if (hasCta) {
+    html += `<a class="cta" href="${ACTIOM_URL}" target="_blank" rel="noopener">Solicitar consulta gratuita
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h12M13 6l6 6-6 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`;
+  }
+  return html;
+}
+
+function addMessage(role, text) {
+  const row = document.createElement("div");
+  row.className = "row " + (role === "user" ? "user" : "bot");
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  if (role === "user") { bubble.textContent = text; row.innerHTML = avatarUser(); }
+  else { bubble.innerHTML = renderBotContent(text); row.innerHTML = avatarBot(); }
+  row.appendChild(bubble);
+  $messages.appendChild(row);
+  scrollToBottom();
+}
+function showTyping() {
+  const row = document.createElement("div");
+  row.className = "row bot"; row.id = "typing-row";
+  row.innerHTML = avatarBot() + `<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  $messages.appendChild(row); scrollToBottom();
+}
+function hideTyping() { const t = document.getElementById("typing-row"); if (t) t.remove(); }
+function scrollToBottom() { $messages.scrollTop = $messages.scrollHeight; }
+
+/* ============================================================
+   API DE CLAUDE (directa desde el navegador)
+   ============================================================ */
+async function callClaude() {
+  const body = {
+    model: MODEL,
+    max_tokens: 1024,
+    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+    messages: messages
+  };
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    let detail = "";
+    try { const err = await res.json(); detail = err?.error?.message || ""; } catch (_) {}
+    throw new Error("HTTP " + res.status + (detail ? " — " + detail : ""));
+  }
+  const data = await res.json();
+  const block = (data.content || []).find((b) => b.type === "text");
+  return block ? block.text : "Lo siento, no he podido generar una respuesta.";
+}
+
+/* ============================================================
+   FLUJO
+   ============================================================ */
+let busy = false;
+async function sendUserMessage(text) {
+  if (busy) return;
+  busy = true; $send.disabled = true;
+  addMessage("user", text);
+  messages.push({ role: "user", content: text });
+  showTyping();
+  try {
+    const reply = await callClaude();
+    hideTyping(); addMessage("assistant", reply);
+    messages.push({ role: "assistant", content: reply });
+  } catch (e) {
+    hideTyping();
+    addMessage("assistant", "Vaya, ha habido un problema técnico al conectar (" + e.message + "). Inténtalo de nuevo en un momento, o escríbenos en actiom.eco.");
+  } finally { busy = false; $send.disabled = false; $input.focus(); }
+}
+async function greet() {
+  if (!keyConfigured) return;
+  busy = true; $send.disabled = true; showTyping();
+  messages.push({ role: "user", content: "(Inicia tú la conversación con tu saludo de bienvenida y tu primera pregunta.)" });
+  try {
+    const reply = await callClaude();
+    hideTyping(); addMessage("assistant", reply);
+    messages.push({ role: "assistant", content: reply });
+  } catch (e) {
+    hideTyping();
+    addMessage("assistant", "¡Hola! Soy el asistente de ACTIOM. Cuéntame, ¿qué mejora de eficiencia energética tienes en mente o has hecho hace poco?");
+  } finally { busy = false; $send.disabled = false; $input.focus(); }
+}
+
+/* ============================================================
+   EVENTOS UI
+   ============================================================ */
+function autoGrow() { $input.style.height = "auto"; $input.style.height = Math.min($input.scrollHeight, 110) + "px"; }
+$input.addEventListener("input", autoGrow);
+$input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $form.requestSubmit(); } });
+$form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $input.value.trim();
+  if (!text) return;
+  $input.value = ""; autoGrow(); sendUserMessage(text);
+});
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+if (!keyConfigured) {
+  $notice.hidden = false; $send.disabled = true; $input.disabled = true;
+  $input.placeholder = "Asistente no configurado";
+  addMessage("assistant", "¡Hola! Soy el asistente de ACTIOM. Para activarme, configura tu clave de API de Anthropic en widget.html (constante ANTHROPIC_API_KEY).");
+} else {
+  greet();
+}
+</script>
+</body>
+</html>
