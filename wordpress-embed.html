@@ -34,10 +34,11 @@
   #actiom-chat-toggle {
     position: fixed; right: 22px; bottom: 22px; z-index: 2147483000;
     width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
-    background: #12a594; box-shadow: 0 8px 24px rgba(18,165,148,.45);
-    display: grid; place-items: center; transition: transform .15s ease, background .15s ease;
+    background: linear-gradient(135deg, #1e438f 0%, #0584a0 52%, #02c0b2 100%);
+    box-shadow: 0 8px 24px rgba(2,192,178,.45);
+    display: grid; place-items: center; transition: transform .15s ease, filter .15s ease;
   }
-  #actiom-chat-toggle:hover { background: #0e8579; transform: translateY(-2px); }
+  #actiom-chat-toggle:hover { filter: brightness(1.08); transform: translateY(-2px); }
   #actiom-chat-panel {
     position: fixed; right: 22px; bottom: 94px; z-index: 2147483000;
     width: 384px; height: 600px; max-height: calc(100vh - 120px);

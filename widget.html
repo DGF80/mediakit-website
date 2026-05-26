@@ -4,15 +4,18 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Asistente ACTIOM</title>
+<link rel="icon" type="image/png" href="assets/actiom-icon.png" />
 <style>
   :root {
     --bg: #ffffff;
-    --ink: #1a2433;
-    --ink-soft: #5a6b7b;
-    --accent: #12a594;
-    --accent-dark: #0e8579;
-    --accent-soft: #e6f6f3;
+    --ink: #2b2d2d;
+    --ink-soft: #5a5c5c;
+    --accent: #02b3a3;
+    --accent-dark: #018f86;
+    --accent-soft: #e4f9f4;
+    --mint: #3afec3;
     --border: #e3e9ec;
+    --grad: linear-gradient(135deg, #1e438f 0%, #0584a0 52%, #02c0b2 100%);
     --bot-bubble: #f1f4f6;
     --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   }
@@ -39,6 +42,7 @@
     flex: 0 0 auto;
   }
   .head .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); display: grid; place-items: center; }
+  .avatar img { width: 72%; height: 72%; object-fit: contain; display: block; }
   .head .who .name { font-weight: 650; font-size: 14.5px; line-height: 1.2; }
   .head .who .status { font-size: 12px; color: var(--accent-dark); display: flex; align-items: center; gap: 6px; }
   .head .who .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -66,11 +70,11 @@
 
   .cta {
     display: inline-flex; align-items: center; gap: 7px; margin-top: 11px;
-    background: var(--accent); color: #fff; text-decoration: none; font-weight: 650;
+    background: var(--grad); color: #fff; text-decoration: none; font-weight: 650;
     font-size: 14px; padding: 10px 16px; border-radius: 11px;
-    box-shadow: 0 6px 16px rgba(18,165,148,.28); transition: background .15s ease, transform .15s ease;
+    box-shadow: 0 6px 16px rgba(2,192,178,.30); transition: filter .15s ease, transform .15s ease;
   }
-  .cta:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
   .typing { display: flex; gap: 4px; padding: 3px 2px; }
   .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-soft); opacity: .5; animation: blink 1.3s infinite both; }
@@ -86,8 +90,8 @@
     line-height: 1.4; max-height: 110px; outline: none; transition: border-color .15s, box-shadow .15s;
   }
   .composer textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  .send { border: none; background: var(--accent); color: #fff; width: 42px; height: 42px; border-radius: 11px; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; transition: background .15s, transform .1s; }
-  .send:hover:not(:disabled) { background: var(--accent-dark); }
+  .send { border: none; background: var(--grad); color: #fff; width: 42px; height: 42px; border-radius: 11px; cursor: pointer; display: grid; place-items: center; flex: 0 0 auto; transition: filter .15s, transform .1s; }
+  .send:hover:not(:disabled) { filter: brightness(1.08); }
   .send:active:not(:disabled) { transform: scale(.94); }
   .send:disabled { background: #c2cdd4; cursor: not-allowed; }
 
@@ -98,7 +102,7 @@
 </head>
 <body>
   <div class="head">
-    <div class="avatar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#12a594"/></svg></div>
+    <div class="avatar"><img src="assets/actiom-icon.png" alt=""></div>
     <div class="who">
       <div class="name">Asistente ACTIOM</div>
       <div class="status">En línea · responde al instante</div>
@@ -199,7 +203,7 @@ const keyConfigured =
    RENDER
    ============================================================ */
 function avatarBot() {
-  return `<div class="avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#12a594"/></svg></div>`;
+  return `<div class="avatar"><img src="assets/actiom-icon.png" alt=""></div>`;
 }
 function avatarUser() {
   return `<div class="avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#8a99a6"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" fill="#8a99a6"/></svg></div>`;
