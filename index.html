@@ -310,6 +310,11 @@
 // REPLACE WITH YOUR ANTHROPIC API KEY
 const ANTHROPIC_API_KEY = "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";
 
+// OPCIONAL (RECOMENDADO EN PRODUCCIÓN): URL de tu backend seguro (Cloudflare Worker).
+// Si la rellenas, la API key de arriba se IGNORA y deja de exponerse en el navegador.
+// Déjala vacía ("") para el modo directo con la key de arriba (solo para demos).
+const BACKEND_URL = "";
+
 const MODEL = "claude-sonnet-4-20250514";
 const API_URL = "https://api.anthropic.com/v1/messages";
 const ACTIOM_URL = "https://actiom.eco";
@@ -375,10 +380,12 @@ const $input = document.getElementById("input");
 const $send = document.getElementById("send");
 const $notice = document.getElementById("apiNotice");
 
+const usingBackend = !!BACKEND_URL && /^https?:\/\//.test(BACKEND_URL);
 const keyConfigured =
   ANTHROPIC_API_KEY &&
   ANTHROPIC_API_KEY !== "REPLACE_WITH_YOUR_ANTHROPIC_API_KEY" &&
   ANTHROPIC_API_KEY.startsWith("sk-");
+const ready = usingBackend || keyConfigured;
 
 /* ============================================================
    RENDER
@@ -449,30 +456,31 @@ function scrollToBottom() {
    LLAMADA A LA API DE CLAUDE (directa desde el navegador)
    ============================================================ */
 async function callClaude() {
-  const body = {
-    model: MODEL,
-    max_tokens: 1024,
-    // System prompt con prompt caching: el prefijo estable se cachea
-    // y se reutiliza en cada turno, reduciendo coste y latencia.
-    system: [
-      {
-        type: "text",
-        text: SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" }
-      }
-    ],
-    messages: messages
-  };
+  // Modo BACKEND (seguro): solo enviamos el historial; el servidor pone el modelo,
+  // el system prompt y la key. Modo DIRECTO (demo): lo construimos todo aquí.
+  const endpoint = usingBackend ? BACKEND_URL : API_URL;
+  const headers = usingBackend
+    ? { "content-type": "application/json" }
+    : {
+        "content-type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        // Necesario para llamar a la API directamente desde el navegador.
+        "anthropic-dangerous-direct-browser-access": "true"
+      };
+  const body = usingBackend
+    ? { messages: messages }
+    : {
+        model: MODEL,
+        max_tokens: 1024,
+        // System prompt con prompt caching: el prefijo estable se cachea.
+        system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+        messages: messages
+      };
 
-  const res = await fetch(API_URL, {
+  const res = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      // Necesario para llamar a la API directamente desde el navegador.
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
+    headers: headers,
     body: JSON.stringify(body)
   });
 
@@ -526,7 +534,7 @@ async function sendUserMessage(text) {
 
 // Saludo inicial: lo pide el sistema al modelo para que sea coherente con su voz.
 async function greet() {
-  if (!keyConfigured) return;
+  if (!ready) return;
   busy = true;
   $send.disabled = true;
   showTyping();
@@ -581,7 +589,7 @@ $form.addEventListener("submit", (e) => {
 /* ============================================================
    ARRANQUE
    ============================================================ */
-if (!keyConfigured) {
+if (!ready) {
   $notice.hidden = false;
   $send.disabled = true;
   $input.disabled = true;

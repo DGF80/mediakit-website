@@ -65,19 +65,47 @@ esa clave.** Si publicas este sitio con una clave real en GitHub Pages, esa clav
 queda expuesta públicamente y puede generar consumo y costes no autorizados.
 
 Esto es aceptable para una **demo, prototipo o prueba interna** con una clave de
-gasto limitado, pero **no es seguro para producción**. Para un despliegue real,
-mueve la llamada a la API a un backend o función serverless (por ejemplo, Cloudflare
-Workers, Vercel Functions, AWS Lambda) que guarde la clave como variable de entorno
-del servidor, y haz que la página llame a ese backend en lugar de a Anthropic
-directamente. Recomendaciones adicionales: restringe el gasto de la clave en la
-consola de Anthropic y rótala periódicamente.
+gasto limitado, pero **no es seguro para producción**. La solución está incluida en
+este repo: el **modo seguro con backend** (ver abajo).
+
+## Modo seguro con backend (producción)
+
+Para producción, la clave NO debe ir en el navegador. La carpeta `backend/`
+incluye un **Cloudflare Worker** (`cloudflare-worker.js`) que guarda la clave como
+secreto del servidor, fija el modelo y el system prompt, limita los tokens y solo
+acepta peticiones desde tus dominios.
+
+Pasos resumidos (instrucciones detalladas dentro del propio archivo):
+1. Crea una cuenta gratis en <https://dash.cloudflare.com> → **Workers & Pages → Create → Worker**.
+2. Pega el contenido de `backend/cloudflare-worker.js` y pulsa **Deploy**.
+3. En **Settings → Variables and Secrets**, añade un **Secret** llamado
+   `ANTHROPIC_API_KEY` con tu clave `sk-ant-...`.
+4. Copia la URL del Worker (`https://...workers.dev`).
+5. En `index.html` y `widget.html`, pega esa URL en la constante `BACKEND_URL`
+   y deja `ANTHROPIC_API_KEY` con el valor placeholder (la key deja de exponerse).
+6. Sube los cambios. Listo: el chat funciona sin exponer la clave.
+
+> Mientras `BACKEND_URL` esté vacío, la app usa el **modo directo** (la key del
+> navegador) — práctico para demos. Con `BACKEND_URL` relleno, usa el **modo seguro**.
+
+## Embeber en WordPress (burbuja flotante)
+
+`widget.html` es una versión compacta del chat pensada para incrustarse. El archivo
+`wordpress-embed.html` contiene un snippet que dibuja una **burbuja flotante** abajo
+a la derecha: pégalo en el **pie (footer)** de WordPress (p. ej. con el plugin
+gratuito *WPCode*) y aparecerá en todas las páginas.
 
 ## Estructura del proyecto
 
 ```
 mediakit-website/
-├── index.html   # Toda la app: HTML + CSS + JS en un solo archivo
-└── README.md    # Este archivo
+├── index.html              # Página completa del asistente (HTML+CSS+JS)
+├── widget.html             # Versión compacta para incrustar (iframe)
+├── wordpress-embed.html    # Snippet de burbuja flotante para WordPress
+├── backend/
+│   └── cloudflare-worker.js  # Backend seguro (guarda la API key en el servidor)
+├── assets/                 # Logos e icono de marca Actiom
+└── README.md               # Este archivo
 ```
 
 ---

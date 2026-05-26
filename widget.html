@@ -130,6 +130,11 @@
 // REPLACE WITH YOUR ANTHROPIC API KEY
 const ANTHROPIC_API_KEY = "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";
 
+// OPCIONAL (RECOMENDADO EN PRODUCCIÓN): URL de tu backend seguro (Cloudflare Worker).
+// Si la rellenas, la API key de arriba se IGNORA y deja de exponerse en el navegador.
+// Déjala vacía ("") para el modo directo con la key de arriba (solo para demos).
+const BACKEND_URL = "";
+
 const MODEL = "claude-sonnet-4-20250514";
 const API_URL = "https://api.anthropic.com/v1/messages";
 const ACTIOM_URL = "https://actiom.eco";
@@ -194,10 +199,12 @@ const $input = document.getElementById("input");
 const $send = document.getElementById("send");
 const $notice = document.getElementById("apiNotice");
 
+const usingBackend = !!BACKEND_URL && /^https?:\/\//.test(BACKEND_URL);
 const keyConfigured =
   ANTHROPIC_API_KEY &&
   ANTHROPIC_API_KEY !== "REPLACE_WITH_YOUR_ANTHROPIC_API_KEY" &&
   ANTHROPIC_API_KEY.startsWith("sk-");
+const ready = usingBackend || keyConfigured;
 
 /* ============================================================
    RENDER
@@ -245,20 +252,26 @@ function scrollToBottom() { $messages.scrollTop = $messages.scrollHeight; }
    API DE CLAUDE (directa desde el navegador)
    ============================================================ */
 async function callClaude() {
-  const body = {
-    model: MODEL,
-    max_tokens: 1024,
-    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-    messages: messages
-  };
-  const res = await fetch(API_URL, {
+  const endpoint = usingBackend ? BACKEND_URL : API_URL;
+  const headers = usingBackend
+    ? { "content-type": "application/json" }
+    : {
+        "content-type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      };
+  const body = usingBackend
+    ? { messages: messages }
+    : {
+        model: MODEL,
+        max_tokens: 1024,
+        system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+        messages: messages
+      };
+  const res = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
+    headers: headers,
     body: JSON.stringify(body)
   });
   if (!res.ok) {
@@ -291,7 +304,7 @@ async function sendUserMessage(text) {
   } finally { busy = false; $send.disabled = false; $input.focus(); }
 }
 async function greet() {
-  if (!keyConfigured) return;
+  if (!ready) return;
   busy = true; $send.disabled = true; showTyping();
   messages.push({ role: "user", content: "(Inicia tú la conversación con tu saludo de bienvenida y tu primera pregunta.)" });
   try {
@@ -320,7 +333,7 @@ $form.addEventListener("submit", (e) => {
 /* ============================================================
    ARRANQUE
    ============================================================ */
-if (!keyConfigured) {
+if (!ready) {
   $notice.hidden = false; $send.disabled = true; $input.disabled = true;
   $input.placeholder = "Asistente no configurado";
   addMessage("assistant", "¡Hola! Soy el asistente de ACTIOM. Para activarme, configura tu clave de API de Anthropic en widget.html (constante ANTHROPIC_API_KEY).");
