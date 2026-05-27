@@ -112,7 +112,7 @@ Reglas del catálogo que debes aplicar al valorar:
       - Elegibilidad preliminar: probable / dudosa / no — con el motivo en pocas palabras
       - Documentos aportados: si subió alguno y qué datos se extrajeron
       - Pendiente por confirmar: datos que faltan para completar la ficha
-   c) La invitación, EXACTAMENTE: "¿Quieres que un especialista de ACTIOM analice tu caso en detalle? Puedes solicitar una consulta gratuita en actiom.eco"
+   c) La invitación, EXACTAMENTE: "¿Quieres que un especialista de ACTIOM revise tu actuación y te ayude a convertirla en CAE? Puedes subir tu actuación gratis en actiom.eco"
    d) En una línea aparte, el marcador: [CTA] (la interfaz lo convierte en un botón).
    El bloque de resumen y [CTA] van SOLO en ese mensaje de cierre, no en cada mensaje. Si aún te falta información esencial, sigue preguntando antes de cerrar.
 

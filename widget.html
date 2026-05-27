@@ -69,10 +69,10 @@
   .row.user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
 
   .cta {
-    display: inline-flex; align-items: center; gap: 7px; margin-top: 11px;
-    background: var(--grad); color: #fff; text-decoration: none; font-weight: 650;
-    font-size: 14px; padding: 10px 16px; border-radius: 11px;
-    box-shadow: 0 6px 16px rgba(2,192,178,.30); transition: filter .15s ease, transform .15s ease;
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 13px;
+    background: linear-gradient(135deg, #0d5f86 0%, #017a70 100%); color: #ffffff; text-decoration: none; font-weight: 700;
+    font-size: 14.5px; padding: 12px 16px; border-radius: 11px;
+    box-shadow: 0 6px 16px rgba(1,122,112,.32); transition: filter .15s ease, transform .15s ease;
   }
   .cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
@@ -236,7 +236,7 @@ Reglas del catálogo que debes aplicar al valorar:
       - Elegibilidad preliminar: probable / dudosa / no — con el motivo en pocas palabras
       - Documentos aportados: si subió alguno y qué datos se extrajeron
       - Pendiente por confirmar: datos que faltan para completar la ficha
-   c) La invitación, EXACTAMENTE: "¿Quieres que un especialista de ACTIOM analice tu caso en detalle? Puedes solicitar una consulta gratuita en actiom.eco"
+   c) La invitación, EXACTAMENTE: "¿Quieres que un especialista de ACTIOM revise tu actuación y te ayude a convertirla en CAE? Puedes subir tu actuación gratis en actiom.eco"
    d) En una línea aparte, el marcador: [CTA] (la interfaz lo convierte en un botón).
    El bloque de resumen y [CTA] van SOLO en ese mensaje de cierre, no en cada mensaje. Si aún te falta información esencial, sigue preguntando antes de cerrar.
 
@@ -281,7 +281,7 @@ function renderBotContent(text) {
   let clean = text.replace(/\[CTA\]/g, "").trim();
   let html = escapeHtml(clean).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
   if (hasCta) {
-    html += `<a class="cta" href="${ACTIOM_URL}" target="_blank" rel="noopener">Solicitar consulta gratuita
+    html += `<a class="cta" href="${ACTIOM_URL}" target="_blank" rel="noopener">Sube tu actuación gratis
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h12M13 6l6 6-6 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`;
   }
   return html;
