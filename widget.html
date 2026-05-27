@@ -279,7 +279,7 @@ function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").r
 function renderBotContent(text) {
   const hasCta = /\[CTA\]/.test(text);
   let clean = text.replace(/\[CTA\]/g, "").trim();
-  let html = escapeHtml(clean);
+  let html = escapeHtml(clean).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
   if (hasCta) {
     html += `<a class="cta" href="${ACTIOM_URL}" target="_blank" rel="noopener">Solicitar consulta gratuita
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h12M13 6l6 6-6 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>`;

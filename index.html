@@ -482,7 +482,7 @@ function escapeHtml(str) {
 function renderBotContent(text) {
   const hasCta = /\[CTA\]/.test(text);
   let clean = text.replace(/\[CTA\]/g, "").trim();
-  let html = escapeHtml(clean);
+  let html = escapeHtml(clean).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
   if (hasCta) {
     html += `<a class="cta" href="${ACTIOM_URL}" target="_blank" rel="noopener">
       Solicitar consulta gratuita
